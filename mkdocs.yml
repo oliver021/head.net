@@ -1,0 +1,70 @@
+site_name: Head.Net Docs
+site_description: Convention-first EF Core and Minimal API SDK for .NET
+site_author: Oliver021
+site_url: https://oliver021.github.io/Head.Net/
+repo_url: https://github.com/oliver021/Head.Net
+repo_name: oliver021/Head.Net
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: light
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: dark
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.emoji:
+      emoji_index: pymdownx.emoji.twemoji
+      emoji_generator: pymdownx.emoji.twemoji
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - minify:
+      minify_js: true
+      minify_css: true
+      minify_html: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Example: getting-started/quick-example.md
+      - Configuration: getting-started/configuration.md
+      - Philosophy: getting-started/philosophy.md
+  - Guides:
+      - Lifecycle Hooks: guides/hooks.md
+      - Custom Actions: guides/actions.md
+      - Query & Paging: guides/paging.md
+      - Authorization: guides/authorization.md
+      - Setup Classes: guides/setup-classes.md
+  - API Reference: api/reference.md

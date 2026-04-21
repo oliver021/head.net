@@ -25,7 +25,8 @@
       "Bash(git commit -m 'Downgrade Docusaurus to 3.4.0 to fix webpack ProgressPlugin compatibility *)",
       "Bash(git commit -m 'Update workflow to use npm install --legacy-peer-deps *)",
       "Bash(git commit -m 'Switch Node.js to v24 in docs workflow *)",
-      "Bash(git commit -m 'Fix docs workflow: revert to Docusaurus 3.10.0 with Node 24 *)"
+      "Bash(git commit -m 'Fix docs workflow: revert to Docusaurus 3.10.0 with Node 24 *)",
+      "Bash(git commit -m 'Switch to MkDocs for documentation *)"
     ]
   }
 }
