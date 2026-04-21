@@ -31,19 +31,5 @@ jobs:
       - name: Pack
         run: dotnet pack Head.Net.sln --no-restore --no-build --configuration Release --output ./artifacts
 
-      - name: Get NuGet Credentials via OIDC
-        id: nuget-creds
-        run: |
-          # Get GitHub OIDC token
-          OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://nuget.org" | jq -r '.token')
-
-          # Exchange for NuGet temporary API key
-          API_KEY=$(curl -sS -X POST https://api.nuget.org/v3/trustedPublish/token \
-            -H "Authorization: Bearer $OIDC_TOKEN" | jq -r '.token')
-
-          echo "::add-mask::$API_KEY"
-          echo "api-key=$API_KEY" >> $GITHUB_OUTPUT
-
       - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ steps.nuget-creds.outputs.api-key }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.NUGET_PUSH_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
