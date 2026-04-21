@@ -6,12 +6,19 @@
     <Description>Entity Framework Core integration for Head.Net.</Description>
     <PackageTags>head;dotnet;efcore;api;entity-framework-core</PackageTags>
     <AssemblyName>Head.Net.EntityFrameworkCore</AssemblyName>
+    <PackageProjectUrl>https://github.com/oliver021/head.net</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <ProjectReference Include="..\Head.Net.Abstractions\Head.Net.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
 </Project>

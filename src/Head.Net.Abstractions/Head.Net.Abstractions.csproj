@@ -6,6 +6,13 @@
     <Description>Shared abstractions and attributes for Head.Net.</Description>
     <PackageTags>head;dotnet;efcore;api;abstractions</PackageTags>
     <AssemblyName>Head.Net.Abstractions</AssemblyName>
+    <PackageProjectUrl>https://github.com/oliver021/head.net</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
+  </ItemGroup>
 
 </Project>
