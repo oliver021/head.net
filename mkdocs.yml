@@ -51,11 +51,14 @@ nav:
       - Installation: getting-started/installation.md
       - Quick Example: getting-started/quick-example.md
       - Configuration: getting-started/configuration.md
-      - Philosophy: getting-started/philosophy.md
+      - Development Philosophy: getting-started/development-philosophy.md
   - Guides:
-      - Lifecycle Hooks: guides/hooks.md
-      - Custom Actions: guides/actions.md
-      - Query & Paging: guides/paging.md
-      - Authorization: guides/authorization.md
+      - Entity Lifecycle Hooks: guides/entity-lifecycle-hooks.md
+      - Custom Actions: guides/custom-actions.md
+      - Query & Paging: guides/query-and-paging.md
+      - Authorization & Ownership: guides/authorization-and-ownership.md
       - Setup Classes: guides/setup-classes.md
-  - API Reference: api/reference.md
+      - AI Agent Skill: guides/ai-agent-skill.md
+  - Product:
+      - Product Notes: product-notes.md
+      - Roadmap: roadmap.md
