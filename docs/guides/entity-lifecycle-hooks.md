@@ -10,22 +10,22 @@ Hooks are the primary extension point in Head.Net. They run at defined points in
 
 ## Available hooks
 
-| Hook | When it runs | Signature |
-|------|-------------|-----------|
-| `BeforeCreate` | Before the entity is persisted | `(TEntity entity, CancellationToken ct)` |
-| `AfterCreate` | After the entity is persisted | `(TEntity entity, CancellationToken ct)` |
-| `BeforeUpdate` | Before the entity is updated | `(int id, TEntity entity, CancellationToken ct)` |
-| `AfterUpdate` | After the entity is updated | `(int id, TEntity entity, CancellationToken ct)` |
-| `BeforeDelete` | Before the entity is removed | `(int id, CancellationToken ct)` |
-| `AfterDelete` | After the entity is removed | `(TEntity entity, CancellationToken ct)` |
+| Hook | When it runs | Return type | Can abort? |
+|------|-------------|-------------|-----------|
+| `BeforeCreate` | Before the entity is persisted | `ValueTask<HeadHookResult<TEntity>?>` | ✅ Yes — return `Invalid(...)` |
+| `AfterCreate` | After the entity is persisted | `ValueTask` | No |
+| `BeforeUpdate` | Before the entity is updated | `ValueTask<HeadHookResult<TEntity>?>` | ✅ Yes — return `Invalid(...)` |
+| `AfterUpdate` | After the entity is updated | `ValueTask` | No |
+| `BeforeDelete` | Before the entity is removed | `ValueTask` | No |
+| `AfterDelete` | After the entity is removed | `ValueTask` | No |
 
-All hooks return `ValueTask` and support cancellation.
+`BeforeCreate` and `BeforeUpdate` return `HeadHookResult<TEntity>?`. Return `null` to proceed normally, or `HeadHookResult<TEntity>.Invalid(validation)` to abort with a `400 Validation Failed` response. All other hooks are fire-and-forget `ValueTask`.
 
 ---
 
 ## BeforeCreate
 
-Use `BeforeCreate` to set derived fields, defaults, or computed state before the entity reaches the database.
+Use `BeforeCreate` to set derived fields, defaults, or computed state before the entity reaches the database. Return `null` to proceed, or a validation result to abort with `400`.
 
 ```csharp
 .BeforeCreate((invoice, ct) =>
@@ -33,7 +33,7 @@ Use `BeforeCreate` to set derived fields, defaults, or computed state before the
     invoice.CreatedAt = DateTimeOffset.UtcNow;
     invoice.Status = "draft";
     invoice.ReferenceNumber = GenerateReference();
-    return ValueTask.CompletedTask;
+    return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null); // null = proceed
 })
 ```
 
@@ -57,13 +57,13 @@ If `AfterCreate` mutates the entity (for example, setting a computed field), `Sa
 
 ## BeforeUpdate
 
-`BeforeUpdate` receives the entity ID and the incoming replacement data. Use it to validate the incoming data, reject illegal state transitions, or stamp an audit timestamp.
+`BeforeUpdate` receives the entity ID and the incoming replacement data. Use it to validate the incoming data, reject illegal state transitions, or stamp an audit timestamp. Return `null` to proceed, or a validation result to abort with `400`.
 
 ```csharp
 .BeforeUpdate((id, invoice, ct) =>
 {
     invoice.UpdatedAt = DateTimeOffset.UtcNow;
-    return ValueTask.CompletedTask;
+    return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null); // null = proceed
 })
 ```
 
@@ -147,17 +147,44 @@ Or use a setup class (see [Setup Classes](./setup-classes)) and inject an `Invoi
 
 ## Validation and short-circuiting
 
-`HeadValidationResult` lets a hook signal that the operation should not proceed. Return a failed result instead of throwing an exception to keep the domain layer free of HTTP concerns.
-
-:::caution Feature note
-Full short-circuit support via `HeadHookResult<TEntity>` is available in the SDK's validation types. Wiring hooks to return results that abort the pipeline is on the active roadmap. For now, throw an exception with a meaningful message to produce a 500 response, or pre-validate in `BeforeCreate`/`BeforeUpdate` and mutate the entity state to signal the issue.
-:::
+`BeforeCreate` and `BeforeUpdate` support clean short-circuit validation. Return `HeadHookResult<TEntity>.Invalid(validation)` to abort the operation and respond with `400 Validation Failed` (RFC 7807 Problem Details). No exception throwing required.
 
 ```csharp
-// HeadValidationResult is available for building validation flows
-var result = HeadValidationResult.Failure("Invoice total must be positive");
-result.IsValid; // false
-result.Errors;  // ["Invoice total must be positive"]
+.BeforeCreate((invoice, ct) =>
+{
+    if (invoice.Total <= 0)
+    {
+        var validation = HeadValidationResult.Failure("Total must be greater than zero");
+        return new ValueTask<HeadHookResult<Invoice>?>(HeadHookResult<Invoice>.Invalid(validation));
+    }
+    invoice.CreatedAt = DateTimeOffset.UtcNow;
+    return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null); // proceed
+})
+```
+
+Multiple errors can be returned at once:
+
+```csharp
+var errors = new List<string>();
+if (string.IsNullOrWhiteSpace(invoice.CustomerName)) errors.Add("CustomerName is required");
+if (invoice.Total <= 0) errors.Add("Total must be positive");
+
+if (errors.Count > 0)
+{
+    var validation = HeadValidationResult.Failure(errors.ToArray());
+    return new ValueTask<HeadHookResult<Invoice>?>(HeadHookResult<Invoice>.Invalid(validation));
+}
+```
+
+The resulting error response:
+
+```json
+{
+  "type": "https://head.net/errors/validation-failed",
+  "title": "Validation Failed",
+  "detail": "CustomerName is required; Total must be positive.",
+  "status": 400
+}
 ```
 
 ---

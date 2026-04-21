@@ -5,18 +5,21 @@ namespace Head.Net.EntityFrameworkCore;
 
 /// <summary>
 /// Persists Head.Net entities using an EF Core <see cref="DbContext"/>.
+/// Supports any key type that implements IComparable for ordering.
 /// </summary>
 /// <typeparam name="TContext">The EF Core context type.</typeparam>
 /// <typeparam name="TEntity">The entity type.</typeparam>
-public sealed class HeadEntityDbContextStore<TContext, TEntity> : IHeadEntityStore<TEntity>
+/// <typeparam name="TKey">The entity's primary key type. Must be non-null, equatable, and comparable.</typeparam>
+public sealed class HeadEntityDbContextStore<TContext, TEntity, TKey> : IHeadEntityStore<TEntity, TKey>
     where TContext : DbContext
-    where TEntity : class, IHeadEntity<int>
+    where TEntity : class, IHeadEntity<TKey>
+    where TKey : notnull, IEquatable<TKey>, IComparable<TKey>
 {
     private readonly TContext dbContext;
     private readonly DbSet<TEntity> dbSet;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="HeadEntityDbContextStore{TContext, TEntity}"/> class.
+    /// Initializes a new instance of the <see cref="HeadEntityDbContextStore{TContext, TEntity, TKey}"/> class.
     /// </summary>
     public HeadEntityDbContextStore(TContext dbContext)
     {
@@ -33,9 +36,9 @@ public sealed class HeadEntityDbContextStore<TContext, TEntity> : IHeadEntitySto
     }
 
     /// <inheritdoc />
-    public Task<TEntity?> GetAsync(int id, CancellationToken cancellationToken)
+    public Task<TEntity?> GetAsync(TKey id, CancellationToken cancellationToken)
     {
-        return dbSet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        return dbSet.FirstOrDefaultAsync(x => x.Id.Equals(id), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -49,9 +52,9 @@ public sealed class HeadEntityDbContextStore<TContext, TEntity> : IHeadEntitySto
     }
 
     /// <inheritdoc />
-    public async Task<TEntity?> UpdateAsync(int id, TEntity entity, CancellationToken cancellationToken)
+    public async Task<TEntity?> UpdateAsync(TKey id, TEntity entity, CancellationToken cancellationToken)
     {
-        var existing = await dbSet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var existing = await dbSet.FirstOrDefaultAsync(x => x.Id.Equals(id), cancellationToken);
         if (existing is null)
         {
             return null;
@@ -64,9 +67,9 @@ public sealed class HeadEntityDbContextStore<TContext, TEntity> : IHeadEntitySto
     }
 
     /// <inheritdoc />
-    public async Task<TEntity?> DeleteAsync(int id, CancellationToken cancellationToken)
+    public async Task<TEntity?> DeleteAsync(TKey id, CancellationToken cancellationToken)
     {
-        var existing = await dbSet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var existing = await dbSet.FirstOrDefaultAsync(x => x.Id.Equals(id), cancellationToken);
         if (existing is null)
         {
             return null;

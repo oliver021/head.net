@@ -11,7 +11,7 @@ public sealed class HeadEntityDbContextStoreTests
     public async Task CreateAsync_Persists_Entity()
     {
         await using var dbContext = CreateContext();
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
 
         var created = await store.CreateAsync(new TestInvoice
         {
@@ -38,7 +38,7 @@ public sealed class HeadEntityDbContextStoreTests
         dbContext.Invoices.Add(seed);
         await dbContext.SaveChangesAsync();
 
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
         var updated = await store.UpdateAsync(seed.Id, new TestInvoice
         {
             Id = seed.Id,
@@ -67,7 +67,7 @@ public sealed class HeadEntityDbContextStoreTests
         dbContext.Invoices.Add(invoice);
         await dbContext.SaveChangesAsync();
 
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
         var loaded = await store.GetAsync(invoice.Id, CancellationToken.None);
 
         Assert.NotNull(loaded);
@@ -89,7 +89,7 @@ public sealed class HeadEntityDbContextStoreTests
         );
         await dbContext.SaveChangesAsync();
 
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
         var items = await store.ListAsync(CancellationToken.None);
 
         Assert.Equal(3, items.Count);
@@ -103,7 +103,7 @@ public sealed class HeadEntityDbContextStoreTests
         dbContext.Invoices.Add(invoice);
         await dbContext.SaveChangesAsync();
 
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
         var deleted = await store.DeleteAsync(invoice.Id, CancellationToken.None);
 
         Assert.NotNull(deleted);
@@ -114,7 +114,7 @@ public sealed class HeadEntityDbContextStoreTests
     public async Task DeleteAsync_Returns_Null_For_Missing_Entity()
     {
         await using var dbContext = CreateContext();
-        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice>(dbContext);
+        var store = new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(dbContext);
 
         var deleted = await store.DeleteAsync(999, CancellationToken.None);
 

@@ -12,11 +12,20 @@ public sealed class HeadEntityEndpointBuilderTests
     [Fact]
     public void Fluent_API_Supports_All_Hooks()
     {
-        HeadBeforeCreateDelegate<DummyEntity> beforeCreate = (entity, ct) => ValueTask.CompletedTask;
+        // BeforeCreate returns HeadHookResult<T>? (null = success)
+        HeadBeforeCreateDelegate<DummyEntity> beforeCreate = (entity, ct)
+            => new ValueTask<HeadHookResult<DummyEntity>?>((HeadHookResult<DummyEntity>?)null);
+
         HeadAfterCreateDelegate<DummyEntity> afterCreate = (entity, ct) => ValueTask.CompletedTask;
-        HeadBeforeUpdateDelegate<DummyEntity> beforeUpdate = (id, entity, ct) => ValueTask.CompletedTask;
-        HeadAfterUpdateDelegate<DummyEntity> afterUpdate = (id, entity, ct) => ValueTask.CompletedTask;
-        HeadBeforeDeleteDelegate<DummyEntity> beforeDelete = (id, ct) => ValueTask.CompletedTask;
+
+        // BeforeUpdate returns HeadHookResult<T>? (null = success)
+        HeadBeforeUpdateDelegate<DummyEntity, int> beforeUpdate = (id, entity, ct)
+            => new ValueTask<HeadHookResult<DummyEntity>?>((HeadHookResult<DummyEntity>?)null);
+
+        HeadAfterUpdateDelegate<DummyEntity, int> afterUpdate = (id, entity, ct) => ValueTask.CompletedTask;
+
+        HeadBeforeDeleteDelegate<DummyEntity, int> beforeDelete = (id, ct) => ValueTask.CompletedTask;
+
         HeadAfterDeleteDelegate<DummyEntity> afterDelete = (entity, ct) => ValueTask.CompletedTask;
 
         // These hooks are defined and can be registered
@@ -178,11 +187,11 @@ public sealed class HeadEntityEndpointBuilderTests
         Assert.True(TrackingSetup.WasConfigured);
     }
 
-    private static HeadEntityEndpointBuilder<DummyEntity> MakeBuilder(
+    private static HeadEntityEndpointBuilder<DummyEntity, int> MakeBuilder(
         IServiceProvider? serviceProvider = null)
     {
         serviceProvider ??= new ServiceCollection().BuildServiceProvider();
-        return new HeadEntityEndpointBuilder<DummyEntity>(
+        return new HeadEntityEndpointBuilder<DummyEntity, int>(
             new FakeEndpointRouteBuilder(serviceProvider), "/dummies");
     }
 
@@ -194,20 +203,20 @@ public sealed class HeadEntityEndpointBuilderTests
         public IApplicationBuilder CreateApplicationBuilder() => throw new NotSupportedException();
     }
 
-    private sealed class TrackingSetup : IHeadEntitySetup<DummyEntity>
+    private sealed class TrackingSetup : IHeadEntitySetup<DummyEntity, int>
     {
         public static bool WasConfigured { get; private set; }
         public TrackingSetup() => WasConfigured = false;
-        public void Configure(HeadEntityEndpointBuilder<DummyEntity> builder) => WasConfigured = true;
+        public void Configure(HeadEntityEndpointBuilder<DummyEntity, int> builder) => WasConfigured = true;
     }
 
     private sealed class FakeDependency { }
 
-    private sealed class DependencyCapturingSetup : IHeadEntitySetup<DummyEntity>
+    private sealed class DependencyCapturingSetup : IHeadEntitySetup<DummyEntity, int>
     {
         public static FakeDependency? CapturedDependency { get; private set; }
         public DependencyCapturingSetup(FakeDependency dep) => CapturedDependency = dep;
-        public void Configure(HeadEntityEndpointBuilder<DummyEntity> builder) { }
+        public void Configure(HeadEntityEndpointBuilder<DummyEntity, int> builder) { }
     }
 
     private sealed class DummyEntity : IHeadEntity<int>

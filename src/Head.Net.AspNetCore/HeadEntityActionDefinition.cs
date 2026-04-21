@@ -7,7 +7,7 @@ namespace Head.Net.AspNetCore;
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public sealed class HeadEntityActionDefinition<TEntity>
-    where TEntity : class, IHeadEntity<int>
+    where TEntity : class
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="HeadEntityActionDefinition{TEntity}"/> class.

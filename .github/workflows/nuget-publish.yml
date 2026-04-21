@@ -32,6 +32,4 @@ jobs:
         run: dotnet pack Head.Net.sln --no-restore --no-build --configuration Release --output ./artifacts
 
       - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate

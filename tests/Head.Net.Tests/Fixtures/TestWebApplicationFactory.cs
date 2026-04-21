@@ -38,8 +38,8 @@ public sealed class TestWebApplicationFactory : IAsyncDisposable
                 options.UseInMemoryDatabase(_dbContextId)
             );
 
-            services.AddScoped<IHeadEntityStore<TestInvoice>>(sp =>
-                new HeadEntityDbContextStore<TestDbContext, TestInvoice>(
+            services.AddScoped<IHeadEntityStore<TestInvoice, int>>(sp =>
+                new HeadEntityDbContextStore<TestDbContext, TestInvoice, int>(
                     sp.GetRequiredService<TestDbContext>()
                 )
             );
@@ -55,23 +55,23 @@ public sealed class TestWebApplicationFactory : IAsyncDisposable
             {
                 endpoints.MapEntity<TestInvoice>("/invoices")
                     .WithCrud()
-                    .BeforeCreate(async (entity, ct) =>
+                    .BeforeCreate((entity, ct) =>
                     {
                         HookCollector.Record("BeforeCreate");
                         entity.CreatedAt = DateTime.UtcNow;
                         if (string.IsNullOrEmpty(entity.Status))
                             entity.Status = "draft";
-                        await Task.CompletedTask;
+                        return new ValueTask<HeadHookResult<TestInvoice>?>((HeadHookResult<TestInvoice>?)null); // Success; proceed
                     })
-                    .AfterCreate(async (entity, ct) =>
+                    .AfterCreate((entity, ct) =>
                     {
                         HookCollector.Record("AfterCreate");
-                        await Task.CompletedTask;
+                        return ValueTask.CompletedTask;
                     })
-                    .BeforeUpdate(async (id, entity, ct) =>
+                    .BeforeUpdate((id, entity, ct) =>
                     {
                         HookCollector.Record("BeforeUpdate");
-                        await Task.CompletedTask;
+                        return new ValueTask<HeadHookResult<TestInvoice>?>((HeadHookResult<TestInvoice>?)null); // Success; proceed
                     })
                     .AfterUpdate(async (id, entity, ct) =>
                     {

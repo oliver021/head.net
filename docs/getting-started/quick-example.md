@@ -45,25 +45,26 @@ public sealed class AppDbContext : DbContext
 The setup class centralizes all entity-specific configuration: hooks, custom actions, paging, and authorization. It can accept dependencies through constructor injection — no DI registration required.
 
 ```csharp
+using Head.Net.Abstractions;
 using Head.Net.AspNetCore;
 
-public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
+public sealed class InvoiceSetup : IHeadEntitySetup<Invoice, int>
 {
     // Optional: inject services through the constructor
     // private readonly ILogger<InvoiceSetup> _logger;
     // public InvoiceSetup(ILogger<InvoiceSetup> logger) => _logger = logger;
 
-    public void Configure(HeadEntityEndpointBuilder<Invoice> builder)
+    public void Configure(HeadEntityEndpointBuilder<Invoice, int> builder)
     {
         builder
             .WithPaging(enable: true, defaultPageSize: 50)
 
-            // Set timestamps and defaults on create
+            // Set timestamps and defaults on create — return null to proceed
             .BeforeCreate((invoice, _) =>
             {
                 invoice.CreatedAt = DateTimeOffset.UtcNow;
                 invoice.Status = "draft";
-                return ValueTask.CompletedTask;
+                return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null);
             })
 
             // Domain action: mark an invoice as paid
@@ -117,7 +118,7 @@ app.MapEntity<Invoice>()
     {
         invoice.CreatedAt = DateTimeOffset.UtcNow;
         invoice.Status = "draft";
-        return ValueTask.CompletedTask;
+        return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null);
     })
     .CustomAction("pay", (invoice, _) =>
     {

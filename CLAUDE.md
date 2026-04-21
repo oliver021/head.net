@@ -17,43 +17,55 @@ This sits between raw Minimal APIs (still require writing every endpoint) and ge
 ## Current Project State
 
 **What's implemented (Phase 1-2):**
-- Abstractions: `IHeadEntity`, `IHeadEntityStore` CRUD contract, `HeadCrudOptions` per-entity configuration
-- EF Core store: `HeadEntityDbContextStore<TEntity>` wrapping DbContext operations
-- Minimal API wiring: `HeadEntityEndpointBuilder` generates CRUD endpoints from stores
-- Basic test coverage with multi-framework support (net8.0, net9.0)
-- Sample API demonstrating end-to-end flow
+- Abstractions: `IHeadEntity<TKey>`, `IHeadEntityStore<TEntity, TKey>` CRUD contract, `HeadCrudOptions` per-entity configuration
+- Hook validation: `BeforeCreate`/`BeforeUpdate` return `HeadHookResult<TEntity>?` for validation short-circuiting
+- RFC 7807 ProblemDetails: All error responses standardized across endpoints
+- Generic key type support: Entities work with int, Guid, long, string, or any IEquatable<TKey> primary key
+- EF Core store: `HeadEntityDbContextStore<TContext, TEntity, TKey>` wrapping DbContext operations with full TKey support
+- Minimal API wiring: `HeadEntityEndpointBuilder<TEntity, TKey>` generates CRUD endpoints from stores
+- Authorization service: `HeadAuthorizationService<TEntity, TKey>` with ownership checks and custom policies
+- Hooks execution service: `HeadHookExecutionService<TEntity, TKey>` managing lifecycle hooks
+- Query builder service: `HeadQueryBuilderService<TEntity>` handling pagination and filtering
+- Basic test coverage with multi-framework support (net8.0, net9.0) — all 85 tests passing
+- Sample API demonstrating end-to-end flow with hooks and custom actions
 
 **What's planned (Phase 3-5):**
-- Query layer: filtering, sorting, paging, ownership rules
-- Hook pipeline expansion: pre/post operation hooks with clean short-circuiting
-- Custom domain actions: routes like `/invoices/{id}/pay` wired to custom handlers
-- Authorization layer: fluent ownership/policy rules close to the entity surface
+- Query layer expansion: advanced filtering, sorting with TKey support, complex ownership rules
+- Custom domain actions: routes like `/invoices/{id}/pay` wired to custom handlers (already wired with auth)
+- Soft delete support: logical deletion tracking in query layer
+- Audit logging: hook pipeline tracking entity change history
+- Role-based authorization: advanced authorization policies beyond ownership
 - Diagnostics: explain what Head.Net generated and how to override
 - Source generation: move from reflection to compile-time code gen for trust and AOT
 
-**Current roadmap focus:** Expanding the hook pipeline and custom action support to make the vertical slice feel complete.
+**Current roadmap focus:** Phase 3 query layer expansion to support advanced filtering, sorting, and complex authorization scenarios with full TKey support.
 
 ## Core Architecture
 
 **Three-layer package design:**
 
 1. **Head.Net.Abstractions** — Shared contracts (no external dependencies)
-   - `IHeadEntity<TKey>`: Base interface requiring an `Id` property
-   - `IHeadEntityStore<TEntity>`: CRUD contract (ListAsync, GetAsync, CreateAsync, UpdateAsync, DeleteAsync, SaveChangesAsync)
+   - `IHeadEntity<TKey>`: Base interface requiring an `Id` property of type `TKey`
+   - `IHeadEntityStore<TEntity, TKey>`: CRUD contract (ListAsync, GetAsync, CreateAsync, UpdateAsync, DeleteAsync, SaveChangesAsync) with generic key type
    - `HeadCrudOptions`: Per-entity configuration controlling which operations are exposed (EnableList, EnableGet, EnableCreate, EnableUpdate, EnableDelete)
-   - `HeadEntityHooks`: Lifecycle hooks for custom behavior (currently defined, expansion needed)
+   - `HeadEntityHooks`: Lifecycle hooks for custom behavior with validation short-circuiting (BeforeCreate/BeforeUpdate return `HeadHookResult<TEntity>?`)
+   - `HeadValidationResult`, `HeadHookResult<T>`, `HeadAuthorizationResult`: Result types for validation, hooks, and authorization
 
 2. **Head.Net.EntityFrameworkCore** — EF Core integration
-   - `HeadEntityDbContextStore<TEntity>`: Generic store implementation wrapping DbContext operations
-   - Handles entity tracking, change detection, and SaveChangesAsync
-   - Registers stores in the dependency container via `HeadNetEntityFrameworkServiceCollectionExtensions`
+   - `HeadEntityDbContextStore<TContext, TEntity, TKey>`: Generic store implementation wrapping DbContext operations with full TKey support
+   - Handles entity tracking, change detection, and SaveChangesAsync using `TKey.Equals()` and `IComparable<TKey>` for ordering
+   - Registers stores via `HeadNetEntityFrameworkServiceCollectionExtensions` with TKey overloads and backward-compatible int defaults
 
 3. **Head.Net.AspNetCore** — Minimal API endpoint generation
-   - `HeadEntityEndpointBuilder`: Analyzes store implementation and generates CRUD endpoints
-   - `HeadNetEndpointRouteBuilderExtensions`: Fluent entry point for `app.MapHeadEntity<T>()`
-   - `HeadEntityActionDefinition`: Per-action configuration (method, route, authorization)
+   - `HeadEntityEndpointBuilder<TEntity, TKey>`: Fluent builder generating CRUD endpoints with authorization and hooks
+   - 6 endpoint handlers: List, Get, Create, Update, Delete, CustomAction — all support arbitrary TKey types
+   - Services: `HeadAuthorizationService<TEntity, TKey>`, `HeadHookExecutionService<TEntity, TKey>`, `HeadQueryBuilderService<TEntity>`, `HeadUserContextService`
+   - `HeadErrorResponseService`: RFC 7807 ProblemDetails error formatting (NotFound, Forbidden, ValidationFailed)
+   - `HeadNetEndpointRouteBuilderExtensions`: Fluent entry point with `app.MapEntity<TEntity, TKey>()` and backward-compatible `MapEntity<TEntity>()`
+   - `IHeadEntitySetup<TEntity, TKey>`: Centralized endpoint configuration pattern
+   - `HeadEntityActionDefinition<TEntity>`: Per-action configuration (method, route, handler)
 
-**Data flow:** Entity class → `IHeadEntity<int>` → `IHeadEntityStore<T>` implementation → `HeadEntityEndpointBuilder` → Minimal API routes + OpenAPI
+**Data flow:** Entity class → `IHeadEntity<TKey>` → `IHeadEntityStore<TEntity, TKey>` → `HeadEntityEndpointBuilder<TEntity, TKey>` → Minimal API routes with validation, authorization, hooks, and RFC 7807 errors
 
 **Design principles to maintain:**
 - Explicit over magical: generated behavior must be understandable
@@ -67,8 +79,8 @@ This sits between raw Minimal APIs (still require writing every endpoint) and ge
 ### Why Minimal APIs, Not MVC Controllers?
 Minimal APIs align with Head.Net's philosophy: developers declare the entity once, and the SDK generates the routing and request/response wiring. MVC controllers would require writing more boilerplate per entity. Minimal APIs are also more discoverable via the fluent extension method pattern.
 
-### Why IHeadEntityStore<TEntity> as the Core Abstraction?
-The store interface is intentionally minimal (CRUD + SaveChanges). This keeps the abstraction stable and testable. Customization happens through hooks and domain actions, not by reimplementing the store. The store is "dumb"—it just applies operations to EF Core. Business logic lives in hooks.
+### Why IHeadEntityStore<TEntity, TKey> as the Core Abstraction?
+The store interface is intentionally minimal (CRUD + SaveChanges) and fully generic over TKey. This keeps the abstraction stable and testable while supporting any primary key type (int, Guid, long, string, etc.). Customization happens through hooks and domain actions, not by reimplementing the store. The store is "dumb"—it just applies operations to EF Core. Business logic lives in hooks.
 
 ### Why EF Core InMemory for Tests?
 InMemory allows tests to run without external database setup while still exercising the full stack: entity tracking, change detection, and relationship handling. No database means tests stay fast and deterministic.

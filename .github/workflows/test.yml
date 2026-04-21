@@ -27,4 +27,12 @@ jobs:
         run: dotnet build Head.Net.sln --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test Head.Net.sln --no-restore --no-build --configuration Release --verbosity normal
+        run: dotnet test Head.Net.sln --no-restore --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Results (.NET ${{ matrix.dotnet-version }})
+          path: '**/test-results.trx'
+          reporter: 'dotnet trx'

@@ -11,17 +11,20 @@ import TabItem from '@theme/TabItem';
 
 As an entity grows in behavior — hooks before and after every operation, multiple custom actions, authorization rules, query filters — the fluent chain in `Program.cs` gets long. Long inline chains in the application entry point do not scale well: they mix infrastructure wiring with domain logic, they cannot receive injected services easily, and they push configuration away from the domain objects it configures.
 
-Head.Net provides `IHeadEntitySetup<TEntity>` to solve this.
+Head.Net provides `IHeadEntitySetup<TEntity, TKey>` to solve this.
 
 ## The interface
 
 ```csharp
-public interface IHeadEntitySetup<TEntity>
-    where TEntity : class, IHeadEntity<int>
+public interface IHeadEntitySetup<TEntity, TKey>
+    where TEntity : class, IHeadEntity<TKey>
+    where TKey : notnull, IEquatable<TKey>
 {
-    void Configure(HeadEntityEndpointBuilder<TEntity> builder);
+    void Configure(HeadEntityEndpointBuilder<TEntity, TKey> builder);
 }
 ```
+
+For the common case of `int` primary keys, the convenience alias `IHeadEntitySetup<TEntity>` is equivalent to `IHeadEntitySetup<TEntity, int>`.
 
 Implement it, and you have a dedicated home for everything related to one entity's API surface.
 
@@ -38,9 +41,9 @@ app.MapEntity<Invoice>()
 ```
 
 ```csharp title="InvoiceSetup.cs"
-public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
+public sealed class InvoiceSetup : IHeadEntitySetup<Invoice, int>
 {
-    public void Configure(HeadEntityEndpointBuilder<Invoice> builder)
+    public void Configure(HeadEntityEndpointBuilder<Invoice, int> builder)
     {
         builder
             .WithPaging(enable: true, defaultPageSize: 50)
@@ -48,7 +51,7 @@ public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
             {
                 invoice.CreatedAt = DateTimeOffset.UtcNow;
                 invoice.Status = "draft";
-                return ValueTask.CompletedTask;
+                return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null);
             })
             .CustomAction("pay", (invoice, _) =>
             {
@@ -90,7 +93,7 @@ app.MapEntity<Invoice>()
 Setup classes support constructor injection without being registered in DI. Head.Net uses `ActivatorUtilities.CreateInstance<TSetup>` under the hood, which resolves constructor parameters from the application's `IServiceProvider` automatically.
 
 ```csharp
-public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
+public sealed class InvoiceSetup : IHeadEntitySetup<Invoice, int>
 {
     private readonly IBillingService _billing;
     private readonly ILogger<InvoiceSetup> _logger;
@@ -102,7 +105,7 @@ public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
         _logger = logger;
     }
 
-    public void Configure(HeadEntityEndpointBuilder<Invoice> builder)
+    public void Configure(HeadEntityEndpointBuilder<Invoice, int> builder)
     {
         builder
             .BeforeCreate(OnBeforeCreate)
@@ -111,12 +114,12 @@ public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
             .CustomAction("void", OnVoid);
     }
 
-    private ValueTask OnBeforeCreate(Invoice invoice, CancellationToken ct)
+    private ValueTask<HeadHookResult<Invoice>?> OnBeforeCreate(Invoice invoice, CancellationToken ct)
     {
         invoice.CreatedAt = DateTimeOffset.UtcNow;
         invoice.Status = "draft";
         _logger.LogInformation("Creating invoice for {Customer}", invoice.CustomerName);
-        return ValueTask.CompletedTask;
+        return new ValueTask<HeadHookResult<Invoice>?>((HeadHookResult<Invoice>?)null);
     }
 
     private async ValueTask OnAfterCreate(Invoice invoice, CancellationToken ct)
@@ -224,9 +227,9 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
 }
 
 // Head.Net
-public sealed class InvoiceSetup : IHeadEntitySetup<Invoice>
+public sealed class InvoiceSetup : IHeadEntitySetup<Invoice, int>
 {
-    public void Configure(HeadEntityEndpointBuilder<Invoice> builder)
+    public void Configure(HeadEntityEndpointBuilder<Invoice, int> builder)
     {
         builder.WithPaging(true, 50).BeforeCreate(OnBeforeCreate);
     }
