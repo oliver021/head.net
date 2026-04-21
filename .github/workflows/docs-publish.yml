@@ -30,10 +30,6 @@ jobs:
         working-directory: website
         run: npm ci
 
-      - name: Generate OpenAPI docs
-        working-directory: website
-        run: npx docusaurus gen-api-docs all
-
       - name: Build docs
         working-directory: website
         run: npm run build

@@ -15,22 +15,30 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-  plugins: [
-    [
-      'docusaurus-plugin-openapi-docs',
-      {
-        id: 'openapi',
-        docsPluginId: 'classic',
-        config: {
-          sampleApi: {
-            specPath: 'static/openapi.yaml',
-            outputDir: 'docs/api',
-            sidebarOptions: { groupPathsBy: 'tag' },
-          },
-        },
-      },
-    ],
-  ],
+  // TODO: Re-enable OpenAPI interactive docs
+  // Status: Disabled pending investigation of CI build failures
+  // OpenAPI spec exists at: static/openapi.yaml
+  // To re-enable:
+  //   1. Uncomment plugins and themes below
+  //   2. Run: npx docusaurus gen-api-docs all
+  //   3. Test build locally: npm run build
+  //   4. Update sidebars.ts to include generated API docs
+  // plugins: [
+  //   [
+  //     'docusaurus-plugin-openapi-docs',
+  //     {
+  //       id: 'openapi',
+  //       docsPluginId: 'classic',
+  //       config: {
+  //         sampleApi: {
+  //           specPath: 'static/openapi.yaml',
+  //           outputDir: 'docs/api',
+  //           sidebarOptions: { groupPathsBy: 'tag' },
+  //         },
+  //       },
+  //     },
+  //   ],
+  // ],
   presets: [
     [
       'classic',
@@ -45,7 +53,8 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-  themes: ['docusaurus-theme-openapi-docs'],
+  // TODO: Re-enable when OpenAPI plugin is stable
+  // themes: ['docusaurus-theme-openapi-docs'],
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {

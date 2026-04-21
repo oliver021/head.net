@@ -1,1 +1,0 @@
-{"parameters":[{"name":"skip","in":"query","schema":{"type":"integer","default":0},"description":"Number of records to skip"},{"name":"take","in":"query","schema":{"type":"integer","default":50},"description":"Number of records to return"}]}

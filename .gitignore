@@ -1,6 +1,7 @@
 bin/
 obj/
 .vs/
+.archive/
 .idea/
 TestResults/
 *.user

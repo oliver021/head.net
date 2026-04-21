@@ -1,1 +1,0 @@
-{"title":"Body","body":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["customerName","total"],"properties":{"customerName":{"type":"string","example":"Northwind Ltd"},"total":{"type":"number","format":"decimal","example":149.95}},"title":"InvoiceWrite"}}}}}
