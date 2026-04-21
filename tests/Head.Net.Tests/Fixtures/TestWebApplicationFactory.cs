@@ -13,16 +13,18 @@ public sealed class TestWebApplicationFactory : IAsyncDisposable
 {
     private readonly string _dbContextId = Guid.NewGuid().ToString("N");
     private TestServer? _testServer;
-    private TestDbContext? _dbContext;
     private HttpClient? _httpClient;
-    private IServiceScope? _scope;
 
     public TestHookCollector HookCollector { get; } = new();
 
     public TestAuthorizationProvider AuthorizationProvider { get; } = new();
 
-    public TestDbContext DbContext =>
-        _dbContext ?? throw new InvalidOperationException("DbContext not initialized");
+    private TestDbContext GetDbContext()
+    {
+        if (_testServer is null) throw new InvalidOperationException("TestServer not initialized");
+        var scope = _testServer.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<TestDbContext>();
+    }
 
     public async Task InitializeAsync()
     {
@@ -106,9 +108,11 @@ public sealed class TestWebApplicationFactory : IAsyncDisposable
         _testServer = new TestServer(builder);
         _httpClient = _testServer.CreateClient();
 
-        _scope = _testServer.Services.CreateScope();
-        _dbContext = _scope.ServiceProvider.GetRequiredService<TestDbContext>();
-        await _dbContext.Database.EnsureCreatedAsync();
+        using (var scope = _testServer.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<TestDbContext>();
+            await dbContext.Database.EnsureCreatedAsync();
+        }
     }
 
     public HttpClient CreateClient()
@@ -118,24 +122,26 @@ public sealed class TestWebApplicationFactory : IAsyncDisposable
 
     public async Task ClearInvoicesAsync()
     {
-        DbContext.Invoices.RemoveRange(DbContext.Invoices);
-        await DbContext.SaveChangesAsync();
+        var dbContext = GetDbContext();
+        dbContext.Invoices.RemoveRange(dbContext.Invoices);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task SeedInvoiceAsync(TestInvoice invoice)
     {
-        DbContext.Invoices.Add(invoice);
-        await DbContext.SaveChangesAsync();
+        var dbContext = GetDbContext();
+        dbContext.Invoices.Add(invoice);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<TestInvoice?> GetInvoiceAsync(int id)
     {
-        return await DbContext.Invoices.FindAsync(id);
+        var dbContext = GetDbContext();
+        return await dbContext.Invoices.FindAsync(id);
     }
 
     public ValueTask DisposeAsync()
     {
-        _scope?.Dispose();
         _testServer?.Dispose();
         _httpClient?.Dispose();
         return ValueTask.CompletedTask;

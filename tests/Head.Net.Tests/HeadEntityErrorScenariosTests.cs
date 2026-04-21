@@ -1,3 +1,4 @@
+using Head.Net.Abstractions;
 using Head.Net.Tests.Fixtures;
 using System.Net;
 using System.Net.Http.Json;
@@ -90,19 +91,24 @@ public sealed class HeadEntityErrorScenariosTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task NegativeSkip_Returns_BadRequest()
+    public async Task NegativeSkip_Returns_OK_With_Normalized_Results()
     {
         var response = await _client.GetAsync("/invoices?skip=-1&take=10");
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = JsonSerializer.Deserialize<HeadPagedResult<TestInvoice>>(await response.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        Assert.NotNull(result);
     }
 
     [Fact]
-    public async Task NegativeTake_Returns_BadRequest()
+    public async Task NegativeTake_Normalized_To_One()
     {
         var response = await _client.GetAsync("/invoices?skip=0&take=-1");
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = JsonSerializer.Deserialize<HeadPagedResult<TestInvoice>>(await response.Content.ReadAsStringAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        Assert.NotNull(result);
+        Assert.Equal(1, result.Take);
     }
 
     [Fact]
