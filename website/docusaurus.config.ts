@@ -37,7 +37,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          docItemComponent: '@theme/ApiItem',
         },
         blog: false,
         theme: {

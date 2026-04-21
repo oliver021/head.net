@@ -10,7 +10,8 @@
       "Bash(yarn build *)",
       "Bash(npx docusaurus *)",
       "Bash(yarn add *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
