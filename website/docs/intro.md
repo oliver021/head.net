@@ -5,6 +5,24 @@ title: Introduction
 description: Head.Net — the EF Core SDK that collapses the CRUD tax on .NET APIs.
 ---
 
+# Intro
+
+Most .NET APIs don’t start with business logic. They start with repetition.
+
+You open a new project, define your first entity, and before anything meaningful happens, you’re laying down the same scaffolding you’ve written countless times. Repositories. Services. Controllers. DTOs. Wiring. Naming. Documentation. None of it is hard — but all of it is unavoidable, and all of it delays the moment where your actual domain starts to take shape.
+
+That friction adds up. Not in complexity, but in time, attention, and cognitive overhead. It’s the quiet tax every team pays on every new entity.
+
+Head.Net was built to remove that tax — not by hiding how APIs work, but by embracing how predictable they already are.
+
+At its core, Head.Net recognizes something simple: most entity-driven APIs follow the same structure. The same CRUD surface. The same lifecycle moments. The same need for validation, side effects, and authorization. Instead of rewriting that structure every time, you declare it once and focus on what actually changes — your domain behavior.
+
+This isn’t about abstraction for its own sake. It’s about shifting effort away from infrastructure you already understand, and toward the logic that makes your system unique.
+
+With Head.Net, you don’t lose control. You keep the same mental model — Minimal APIs, dependency injection, EF Core — but with the repetitive wiring compressed into a small, explicit configuration surface. The result is not less clarity, but more signal: less time navigating boilerplate, more time reasoning about behavior.
+
+If you’ve ever thought “I’ve built this exact API before,” you’re in the right place.
+
 # You've written this before
 
 You're about to build a new internal API. There's an `Invoice` entity, some business rules around it, and it needs five standard HTTP endpoints.

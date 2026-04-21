@@ -1,0 +1,37 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+
+      - name: Restore
+        run: dotnet restore Head.Net.sln
+
+      - name: Build
+        run: dotnet build Head.Net.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Head.Net.sln --no-restore --no-build --configuration Release
+
+      - name: Pack
+        run: dotnet pack Head.Net.sln --no-restore --no-build --configuration Release --output ./artifacts
+
+      - name: Publish to NuGet
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
