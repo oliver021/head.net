@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: website
-        run: npm install --legacy-peer-deps
+        run: npm install
 
       - name: Check docs structure
         working-directory: website
