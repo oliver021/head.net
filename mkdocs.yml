@@ -8,8 +8,6 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  logo: assets/logo.png
-  favicon: assets/favicon.ico
   features:
     - navigation.instant
     - navigation.tracking
@@ -41,18 +39,11 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.highlight:
       use_pygments: true
-  - pymdownx.emoji:
-      emoji_index: pymdownx.emoji.twemoji
-      emoji_generator: pymdownx.emoji.twemoji
   - toc:
       permalink: true
 
 plugins:
   - search
-  - minify:
-      minify_js: true
-      minify_css: true
-      minify_html: true
 
 nav:
   - Home: index.md
