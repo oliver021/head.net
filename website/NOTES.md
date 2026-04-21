@@ -3,7 +3,7 @@
 ## Pending Features
 
 ### OpenAPI Interactive Docs
-**Status:** Disabled (pending investigation)  
+**Status:** Disabled (pending investigation)
 **Why:** The `docusaurus-plugin-openapi-docs` plugin was causing build failures in GitHub Actions CI environments.
 
 **What we have:**
