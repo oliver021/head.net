@@ -1,0 +1,8 @@
+{
+  "label": "Guides",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "In-depth guides for the core features of Head.Net: hooks, custom actions, paging, authorization, and setup classes."
+  }
+}

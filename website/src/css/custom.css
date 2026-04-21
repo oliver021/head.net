@@ -1,0 +1,59 @@
+:root {
+  --ifm-color-primary: #1c6b57;
+  --ifm-color-primary-dark: #195f4d;
+  --ifm-color-primary-darker: #175a49;
+  --ifm-color-primary-darkest: #13493b;
+  --ifm-color-primary-light: #1f7761;
+  --ifm-color-primary-lighter: #218066;
+  --ifm-color-primary-lightest: #27977a;
+  --ifm-code-font-size: 95%;
+  --ifm-background-color: #f8faf8;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #6fd0b2;
+  --ifm-color-primary-dark: #54c7a4;
+  --ifm-color-primary-darker: #48c29d;
+  --ifm-color-primary-darkest: #33a786;
+  --ifm-color-primary-light: #8ad9c0;
+  --ifm-color-primary-lighter: #97ddc7;
+  --ifm-color-primary-lightest: #bcebdd;
+  --ifm-background-color: #0f1714;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* Admonition overrides — match teal brand palette */
+.alert--info {
+  --ifm-alert-background-color: rgba(111, 208, 178, 0.12);
+  --ifm-alert-border-color: var(--ifm-color-primary);
+}
+
+.alert--success {
+  --ifm-alert-background-color: rgba(111, 208, 178, 0.18);
+  --ifm-alert-border-color: var(--ifm-color-primary-dark);
+}
+
+.alert--warning {
+  --ifm-alert-background-color: rgba(255, 200, 100, 0.12);
+  --ifm-alert-border-color: #d4930a;
+}
+
+.alert--danger {
+  --ifm-alert-background-color: rgba(220, 80, 80, 0.1);
+  --ifm-alert-border-color: #c0392b;
+}
+
+[data-theme='dark'] .alert--info {
+  --ifm-alert-background-color: rgba(111, 208, 178, 0.08);
+}
+
+[data-theme='dark'] .alert--success {
+  --ifm-alert-background-color: rgba(111, 208, 178, 0.12);
+}
+
+.hero--primary {
+  background:
+    radial-gradient(circle at top left, rgba(111, 208, 178, 0.18), transparent 30%),
+    linear-gradient(135deg, #173a31, #0f1714 72%);
+}

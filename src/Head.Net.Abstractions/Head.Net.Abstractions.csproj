@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <PackageId>Head.Net.Abstractions</PackageId>
+    <Description>Shared abstractions and attributes for Head.Net.</Description>
+    <PackageTags>head;dotnet;efcore;api;abstractions</PackageTags>
+    <AssemblyName>Head.Net.Abstractions</AssemblyName>
+  </PropertyGroup>
+
+</Project>

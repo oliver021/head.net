@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <PackageId>Head.Net.EntityFrameworkCore</PackageId>
+    <Description>Entity Framework Core integration for Head.Net.</Description>
+    <PackageTags>head;dotnet;efcore;api;entity-framework-core</PackageTags>
+    <AssemblyName>Head.Net.EntityFrameworkCore</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <ProjectReference Include="..\Head.Net.Abstractions\Head.Net.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

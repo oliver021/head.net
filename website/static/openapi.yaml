@@ -1,0 +1,174 @@
+openapi: 3.0.3
+info:
+  title: Head.Net Sample API
+  version: "1.0"
+  description: >
+    Auto-generated endpoints from `app.MapEntity<Invoice>().WithCrud().Setup<InvoiceSetup>().Build()`.
+    All routes are standard Minimal API handlers wired to EF Core through `IHeadEntityStore<Invoice>`.
+tags:
+  - name: Invoices
+    description: CRUD and domain actions for the Invoice entity
+
+paths:
+  /invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices (paged)
+      parameters:
+        - name: skip
+          in: query
+          schema: { type: integer, default: 0 }
+          description: Number of records to skip
+        - name: take
+          in: query
+          schema: { type: integer, default: 50 }
+          description: Number of records to return
+      responses:
+        "200":
+          description: Paginated invoice list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoicePagedResult'
+    post:
+      tags: [Invoices]
+      summary: Create an invoice
+      description: Runs `BeforeCreate` hooks before saving; runs `AfterCreate` hooks after.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceWrite'
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+
+  /invoices/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [Invoices]
+      summary: Get a single invoice
+      responses:
+        "200":
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        "404":
+          description: Not found
+    put:
+      tags: [Invoices]
+      summary: Update an invoice
+      description: Runs `BeforeUpdate` hooks before saving; runs `AfterUpdate` hooks after.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceWrite'
+      responses:
+        "200":
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        "404":
+          description: Not found
+    delete:
+      tags: [Invoices]
+      summary: Delete an invoice
+      description: Runs `BeforeDelete` hooks before deletion; runs `AfterDelete` hooks after.
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /invoices/{id}/pay:
+    post:
+      tags: [Invoices]
+      summary: Pay an invoice (custom action)
+      description: >
+        Loads the invoice, calls the `pay` custom action delegate, then persists changes.
+        Defined via `.CustomAction("pay", handler)` in `InvoiceSetup.Configure`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Invoice marked as paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        "404":
+          description: Invoice not found
+
+components:
+  schemas:
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        customerName:
+          type: string
+        total:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [draft, paid, archived, voided]
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+
+    InvoiceWrite:
+      type: object
+      required: [customerName, total]
+      properties:
+        customerName:
+          type: string
+          example: Northwind Ltd
+        total:
+          type: number
+          format: decimal
+          example: 149.95
+
+    InvoicePagedResult:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+        totalCount:
+          type: integer
+        skip:
+          type: integer
+        take:
+          type: integer
+        pageCount:
+          type: integer
+        pageNumber:
+          type: integer

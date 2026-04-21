@@ -1,0 +1,70 @@
+---
+id: pay-an-invoice-custom-action
+title: "Pay an invoice (custom action)"
+description: "Loads the invoice, calls the `pay` custom action delegate, then persists changes. Defined via `.CustomAction('pay', handler)` in `InvoiceSetup.Configure`."
+sidebar_label: "Pay an invoice (custom action)"
+hide_title: true
+hide_table_of_contents: true
+api: eJzNVE2P20YM/SsETzagyJsiJyEo4G4TdIF8LLItevAaEFdDW5OMZiYzlFtD0H8vKNmbze6mQG89WZ7hIx8573FAoX3GaoNX/hBswxm3BRrOTbJRbPBY4btAJoO0DHaOKaAh5+ajOtKxhqbPEjqgRiFg2PGehAuN8BA5ZZslQ9OS33Mu4VfeWc8GDpagLi8n8HrCLm4x0vEWC2jJG8dpWYP1UJ/Y3bD0sbwMfmf3feK6vPVYYKREHQsnbWRATx1jhdZggVYbiCQtFpj4a28TG6wk9VxgblruCKsB5RgnhBfec8Jx3Gp0jsFnzhrw08WF/nw/lxMn6Ch9YQOUIdJUtAle2IsiKEZnG1LE6nNW2PC0brj7zI1oIylETmLnotY8w02Jkfno3XFuYyxwHj6nD1Pf94gsyfo9jgVKEHIPbnzf3U2pdiF1JFih4cZ25DQ4C0mfn+YpkH3fqVJMot3Edu6WUtPaA+vnIVjDBrdKKjEJm7U8l+lbXRJ+Ibbj5/rS/P8B73vn6M7x+Xkf5dM5WNHr88PhOOrpq4tXP35bHwR2ofcGNbRjaYNRRYU8T0BarHB18kVeDdaMq0jHSXm7MHE/Ff2NyZQfWOCGuugY1tdXOjH1xlTxZXmBj5237iW82LPnpLME9iYG6yXDLoUOaoqxfE/xjRcrx9cnyj8vluWfVtrL1JvFspwc8/qhfTTgl946s1jWJaydgxR64QyUGLKQN5QMvLdeFaE0z1bM8JfaByTAm7dwGRKDtCn0+xbqK21vJnIjIfE9m8mi+pghS0eT/k/+vKYjkD/vFFh8t0OWj2cxfHPV/38hnfQq/LesoiM7TaBPkwdnzWzwrBkssJp8pLLZFtiqtKoNDsMdZf4juXHU4689pyNWm22BB0p2FvpmQGOzfhusduQy/8vUFp9O+28JP6J4OiSvAj6Q6/UfFviFj/NCHdXaLZPhNFWfL9ZNw1EeQJ5sPV2o9+a5/njzO47jP12sOos=
+sidebar_class_name: "post api-method"
+info_path: docs/api/head-net-sample-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Pay an invoice (custom action)"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/invoices/{id}/pay"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Loads the invoice, calls the `pay` custom action delegate, then persists changes. Defined via `.CustomAction("pay", handler)` in `InvoiceSetup.Configure`.
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./pay-an-invoice-custom-action.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./pay-an-invoice-custom-action.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./pay-an-invoice-custom-action.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      
