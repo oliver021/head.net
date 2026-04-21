@@ -1,0 +1,50 @@
+name: Test Coverage & Documentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Run tests with coverage
+      run: |
+        dotnet test tests/Head.Net.Tests/Head.Net.Tests.csproj `
+          --configuration Release `
+          --no-build `
+          --framework net9.0 `
+          --logger "trx;LogFileName=test-results.trx" `
+          /p:CollectCoverage=true `
+          /p:CoverageFormat=opencover `
+          /p:CoverageFileName="coverage.xml"
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./tests/Head.Net.Tests/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/test-results.trx'

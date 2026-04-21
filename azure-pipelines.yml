@@ -1,0 +1,116 @@
+trigger:
+  - main
+
+pr:
+  - main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  dotnetVersion: '9.0.x'
+
+stages:
+  - stage: Build
+    displayName: 'Build & Test'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Build Solution'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: $(dotnetVersion)
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet packages'
+            inputs:
+              command: 'restore'
+              projects: 'Head.Net.sln'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build solution'
+            inputs:
+              command: 'build'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+              projects: 'Head.Net.sln'
+
+      - job: TestNet9
+        displayName: 'Test (.NET 9.0)'
+        dependsOn: BuildAndTest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: $(dotnetVersion)
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Run tests'
+            inputs:
+              command: 'test'
+              arguments: '--framework net9.0 --logger trx --collect:"XPlat Code Coverage"'
+              projects: 'tests/Head.Net.Tests/Head.Net.Tests.csproj'
+
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(Agent.TempDirectory)/**/*coverage.cobertura.xml'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '**/test-results.trx'
+              testRunTitle: '.NET 9.0 Tests'
+
+      - job: TestNet8
+        displayName: 'Test (.NET 8.0)'
+        dependsOn: BuildAndTest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: '8.0.x'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Run tests'
+            inputs:
+              command: 'test'
+              arguments: '--framework net8.0 --logger trx'
+              projects: 'tests/Head.Net.Tests/Head.Net.Tests.csproj'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '**/test-results.trx'
+              testRunTitle: '.NET 8.0 Tests'
+
+  - stage: Coverage
+    displayName: 'Generate Coverage Reports'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: GenerateCoverage
+        displayName: 'Code Coverage Report'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: $(dotnetVersion)
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Run tests with coverage'
+            inputs:
+              command: 'test'
+              arguments: '--framework net9.0 /p:CollectCoverage=true /p:CoverageFormat=opencover'
+              projects: 'tests/Head.Net.Tests/Head.Net.Tests.csproj'
+
+          - script: |
+              dotnet tool install -g reportgenerator
+              reportgenerator -reports:"tests/Head.Net.Tests/coverage.xml" -targetdir:"$(Build.ArtifactStagingDirectory)/coverage" -reporttypes:Html
+            displayName: 'Generate HTML coverage report'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish coverage report'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/coverage'
+              artifactName: 'code-coverage'

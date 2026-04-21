@@ -28,7 +28,10 @@
       "Bash(git commit -m 'Fix docs workflow: revert to Docusaurus 3.10.0 with Node 24 *)",
       "Bash(git commit -m 'Switch to MkDocs for documentation *)",
       "Bash(git commit -m 'Fix mkdocs.yml: remove problematic extensions and simplify config *)",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Bash(cat)",
+      "Bash(mkdir -p .github/workflows)",
+      "Bash(mkdir -p docs)"
     ]
   }
 }
