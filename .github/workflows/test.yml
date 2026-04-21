@@ -35,4 +35,4 @@ jobs:
         with:
           name: Test Results (.NET ${{ matrix.dotnet-version }})
           path: '**/test-results.trx'
-          reporter: 'dotnet trx'
+          reporter: 'dotnet-trx'
