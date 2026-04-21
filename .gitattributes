@@ -1,0 +1,19 @@
+# Tell GitHub Linguist (language detection) to ignore certain folders
+
+# Vendored dependencies — don't count in language stats
+website/node_modules/** linguist-vendored
+website/build/** linguist-generated
+
+# Documentation — count separately, don't affect primary language
+website/** linguist-documentation
+
+# Generated code — don't count
+**/bin/** linguist-generated
+**/obj/** linguist-generated
+artifacts/** linguist-generated
+
+# Test files — optional: count as test code, not primary code
+tests/** linguist-detectable=true
+
+# NuGet
+*.nupkg linguist-vendored
