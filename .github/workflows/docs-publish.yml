@@ -26,13 +26,43 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
         working-directory: website
-        run: npm ci
+        run: npm ci --verbose
 
-      - name: Build docs
+      - name: Check docs structure
         working-directory: website
-        run: npm run build
+        run: |
+          echo "=== Checking docs folder ==="
+          ls -la docs/
+          echo ""
+          echo "=== Checking sidebars.ts ==="
+          head -20 sidebars.ts
+          echo ""
+          echo "=== Checking docusaurus.config.ts ==="
+          grep -A 5 "presets:" docusaurus.config.ts || true
+
+      - name: Build docs with verbose output
+        working-directory: website
+        run: |
+          echo "=== Node & npm versions ==="
+          node --version
+          npm --version
+          echo ""
+          echo "=== Installed packages ==="
+          npm ls --depth=0
+          echo ""
+          echo "=== Starting build ==="
+          npm run build 2>&1 | tee build.log
+        continue-on-error: true
+
+      - name: Show build log if failed
+        working-directory: website
+        if: failure()
+        run: tail -100 build.log
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3.0.1
