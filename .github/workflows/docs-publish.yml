@@ -45,7 +45,7 @@ jobs:
           echo "=== Checking docusaurus.config.ts ==="
           grep -A 5 "presets:" docusaurus.config.ts || true
 
-      - name: Build docs with verbose output
+      - name: Build docs
         working-directory: website
         run: |
           echo "=== Node & npm versions ==="
@@ -55,14 +55,22 @@ jobs:
           echo "=== Installed packages ==="
           npm ls --depth=0
           echo ""
-          echo "=== Starting build ==="
-          npm run build 2>&1 | tee build.log
-        continue-on-error: true
+          echo "=== Starting Docusaurus build ==="
+          npm run build
 
-      - name: Show build log if failed
+      - name: Verify build output
         working-directory: website
-        if: failure()
-        run: tail -100 build.log
+        if: always()
+        run: |
+          echo "=== Checking for build folder ==="
+          if [ -d "build" ]; then
+            echo "✓ Build folder exists"
+            du -sh build
+            ls -la build/ | head -20
+          else
+            echo "✗ Build folder NOT found!"
+            ls -la
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3.0.1
