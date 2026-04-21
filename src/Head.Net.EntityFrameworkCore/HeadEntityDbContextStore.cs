@@ -42,6 +42,8 @@ public sealed class HeadEntityDbContextStore<TContext, TEntity> : IHeadEntitySto
     public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken)
     {
         await dbSet.AddAsync(entity, cancellationToken);
+
+        // flush changes
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }

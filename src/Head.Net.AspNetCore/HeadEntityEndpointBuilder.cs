@@ -266,9 +266,9 @@ public sealed class HeadEntityEndpointBuilder<TEntity>
                 if (afterCreate is not null)
                 {
                     await afterCreate(created, cancellationToken);
-                    await store.SaveChangesAsync(cancellationToken);
                 }
 
+                await store.SaveChangesAsync(cancellationToken);
                 return Results.Created($"{routePattern}/{created.Id}", created);
             }).WithName($"{typeof(TEntity).Name}_Create");
         }
@@ -308,9 +308,9 @@ public sealed class HeadEntityEndpointBuilder<TEntity>
                 if (afterUpdate is not null)
                 {
                     await afterUpdate(id, updated, cancellationToken);
-                    await store.SaveChangesAsync(cancellationToken);
                 }
 
+                await store.SaveChangesAsync(cancellationToken);
                 return Results.Ok(updated);
             }).WithName($"{typeof(TEntity).Name}_Update");
         }
@@ -350,6 +350,7 @@ public sealed class HeadEntityEndpointBuilder<TEntity>
                     await afterDelete(deleted, cancellationToken);
                 }
 
+                await store.SaveChangesAsync(cancellationToken);
                 return Results.Ok(deleted);
             }).WithName($"{typeof(TEntity).Name}_Delete");
         }
