@@ -59,6 +59,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
           DEBUG: "docusaurus:*"
+          WEBPACK_PROGRESS: "false"
         run: |
           echo "=== Node & npm versions ==="
           node --version
@@ -97,3 +98,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4.0.5
+
+  # TEMP: Docs build disabled due to webpack ProgressPlugin issue
+  # TODO: Resolve ProgressPlugin validation error and re-enable
+  # Tracking: Docusaurus 3.x incompatibility with current webpack version in CI
+  # Workaround: Build docs locally and commit, OR switch to yarn package manager
