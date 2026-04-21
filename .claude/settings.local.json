@@ -14,7 +14,18 @@
       "Bash(npm run *)",
       "Bash(git check-ignore *)",
       "Bash(git ls-files *)",
-      "Bash(git commit -m 'Add verbose logging to docs build workflow for CI debugging *)"
+      "Bash(git commit -m 'Add verbose logging to docs build workflow for CI debugging *)",
+      "Bash(git push *)",
+      "Bash(gh pr *)",
+      "Bash(git commit -m 'Fix docs workflow: remove continue-on-error and add build verification *)",
+      "Bash(git commit -m 'Add debugging steps to diagnose Docusaurus build failure in CI *)",
+      "Bash(git commit -m 'Add line ending normalization to prevent CI build issues *)",
+      "Bash(npm cache *)",
+      "Bash(npm update *)",
+      "Bash(git commit -m 'Downgrade Docusaurus to 3.4.0 to fix webpack ProgressPlugin compatibility *)",
+      "Bash(git commit -m 'Update workflow to use npm install --legacy-peer-deps *)",
+      "Bash(git commit -m 'Switch Node.js to v24 in docs workflow *)",
+      "Bash(git commit -m 'Fix docs workflow: revert to Docusaurus 3.10.0 with Node 24 *)"
     ]
   }
 }
